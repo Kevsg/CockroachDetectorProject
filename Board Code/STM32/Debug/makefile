@@ -30,13 +30,13 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: UartTestStm.elf
+all: Cockroach1312.elf
 
 # Tool invocations
-UartTestStm.elf: $(OBJS) $(USER_OBJS) ../STM32F407VGTx_FLASH.ld
+Cockroach1312.elf: $(OBJS) $(USER_OBJS) ../STM32F407VGTx_FLASH.ld
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU GCC Linker'
-	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -specs=nosys.specs -specs=nano.specs -T"../STM32F407VGTx_FLASH.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "UartTestStm.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
+	arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -specs=nosys.specs -specs=nano.specs -T"../STM32F407VGTx_FLASH.ld" -Wl,-Map=output.map -Wl,--gc-sections -o "Cockroach1312.elf" @"objects.list" $(USER_OBJS) $(LIBS) -lm
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build
@@ -48,8 +48,8 @@ clean:
 
 post-build:
 	-@echo 'Generating hex and Printing size information:'
-	arm-none-eabi-objcopy -O ihex "UartTestStm.elf" "UartTestStm.hex"
-	arm-none-eabi-size "UartTestStm.elf"
+	arm-none-eabi-objcopy -O ihex "Cockroach1312.elf" "Cockroach1312.hex"
+	arm-none-eabi-size "Cockroach1312.elf"
 	-@echo ' '
 
 .PHONY: all clean dependents
