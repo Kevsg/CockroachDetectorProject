@@ -1,22 +1,21 @@
+#include <Time.h>
+#include <TimeLib.h>
+
 /*  NETPIE ESP8266 basic sample                            */
 /*  More information visit : https://netpie.io             */
 
 #include <ESP8266WiFi.h>
 #include <MicroGear.h>
+#include <ESP8266WiFiMulti.h>
+#include <ESP8266HTTPClient.h>
 
-const char* ssid     = "TP-Link_78E0";
-const char* password = "54922631";
-
-
-/*
 const char* ssid     = "33";
 const char* password = "33445566";
-*/
 
-#define APPID   ""
-#define KEY     ""
-#define SECRET  ""
-#define ALIAS   ""
+#define APPID   "KevinNodeMCU"
+#define KEY     "gCXI5fhwcoI10Ib"
+#define SECRET  "Yzer4RmRJcIxz5d3iV5KUDHXz"
+#define ALIAS   "NodeMCU"
 
 WiFiClient client;
 
@@ -27,15 +26,22 @@ char c;
 
 /* If a new message arrives, do this */
 void onMsghandler(char *topic, uint8_t* msg, unsigned int msglen) {
-  Serial.print("Incoming message --> ");
+  //Serial.print("Incoming message --> ");
   msg[msglen] = '\0';
-  Serial.println((char *)msg);
+  //Serial.println((char *)msg);
+  char on[2] = {'o','n'};
+  char off[3] = {'o','f','f'};
+  if(strcmp(on,(char *)msg)==0) {
+    Serial.write("on1"); 
+  } else if (strcmp(off,(char *) msg)){
+    Serial.write("off");  
+  }
 }
 
 void onFoundgear(char *attribute, uint8_t* msg, unsigned int msglen) {
   Serial.print("Found new member --> ");
   for (int i = 0; i < msglen; i++)
-    Serial.print((char)msg[i]);
+  Serial.print((char)msg[i]);
   Serial.println();
 }
 
@@ -53,7 +59,6 @@ void onConnected(char *attribute, uint8_t* msg, unsigned int msglen) {
   microgear.setAlias(ALIAS);
 }
 
-
 void setup() {
   /* Add Event listeners */
   /* Call onMsghandler() when new message arraives */
@@ -68,7 +73,7 @@ void setup() {
   /* Call onConnected() when NETPIE connection is established */
   microgear.on(CONNECTED, onConnected);
 
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("Starting...");
 
   /* Initial WIFI, this is just a basic method to configure WIFI on ESP8266.                       */
@@ -92,33 +97,23 @@ void setup() {
 }
 
 void loop() {
-  
+
+  HTTPClient http;
   /* To check if the microgear is still connected */
   if (microgear.connected()) {
-    Serial.println("connected");
-
-    /* Call this method regularly otherwise the connection may be lost */
+    // Serial.println("connected");
     microgear.loop();
-
-    if (timer >= 1000) {
-      if(Serial.available()) {
-        String s = Serial.readString();
-        Serial.println("Publish...");
-        Serial.println("String is " + s);
-        microgear.chat(ALIAS,s);  
+    if(Serial.available()) {
+      String s = Serial.readString();
+      if(s == "1") {
+        microgear.chat("Backend","s1");
+      } else if (s=="2") {
+        microgear.chat("Backend","s2");
       }
-      /* Chat with the microgear named ALIAS which is myself */
-      timer = 0;
     }
-    else timer += 100;
-  }
-  else {
-    Serial.println("connection lost, reconnect...");
-    if (timer >= 5000) {
+  } else {
       microgear.connect(APPID);
-      timer = 0;
-    }
-    else timer += 100;
+      delay(1000);
   }
-  delay(100);
+  delay(500);
 }

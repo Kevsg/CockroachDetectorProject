@@ -73,6 +73,9 @@ int state = 0;
 int state2 = 0;
 int nextState = 0;
 int nextState2 = 0;
+char on[3] = {'o','n','1'};
+char off[3] = {'o','f','f'};
+int sendState = 1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -92,6 +95,8 @@ void delayUS_DWT(uint32_t us) {
 	do  {
 	} while(DWT->CYCCNT - start < cycles);
 }
+
+
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -145,6 +150,7 @@ int main(void)
     MX_USB_HOST_Process();
 
   /* USER CODE BEGIN 3 */
+
     i = 0;
     HAL_GPIO_WritePin(GPIOD,GPIO_PIN_9,GPIO_PIN_SET);
     delayUS_DWT(2);
@@ -162,6 +168,7 @@ int main(void)
 
     j = i;
     Distance = (float)j*0.0171821*2;
+
     if(Distance < limit) {
     	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_12,GPIO_PIN_SET);
     	nextState = 1;
@@ -195,23 +202,46 @@ int main(void)
     	nextState2 = 0;
     }
 
+
     if(nextState==1 || nextState2==1) {
     	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_9,GPIO_PIN_SET);
     } else {
     	HAL_GPIO_WritePin(GPIOE,GPIO_PIN_9,GPIO_PIN_RESET);
     }
 
-    if(state == 0 && nextState == 1) {
-    	HAL_UART_Transmit(&huart2,"Sensor 1 Detected",sizeof("Sensor 1 Detected"),100);
+
+    if(state == 0 && nextState == 1 && sendState) {
+	    	HAL_UART_Transmit(&huart2,"1",sizeof("1"),100);
     }
 
-    if(state2 == 0 && nextState2 == 1) {
-        HAL_UART_Transmit(&huart2,"Sensor 2 Detected",sizeof("Sensor 2 Detected"),100);
+    else if(state2 == 0 && nextState2 == 1 && sendState) {
+            HAL_UART_Transmit(&huart2,"2",sizeof("2"),100);
     }
+
     state = nextState;
     state2 = nextState2;
+
+
+    char pData[3];
+    if(HAL_UART_Receive_IT(&huart2,pData,3) == HAL_OK) {
+
+        if(strcmp(on,(char *)pData) == 0) {
+        	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,1);
+        	sendState = 1;
+        }
+        else if (strcmp(off,(char *)pData) == 0) {
+        	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_13,0);
+        	sendState = 0;
+        }
+        else {
+        	HAL_GPIO_TogglePin(GPIOD,GPIO_PIN_14);
+        }
+
+    }
+
     HAL_Delay(50);
   }
+
   /* USER CODE END 3 */
 
 }
